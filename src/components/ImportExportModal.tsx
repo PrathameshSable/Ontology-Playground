@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { X, Upload, Download, FileJson, AlertCircle, CheckCircle, RotateCcw, Copy } from 'lucide-react';
+import { X, Upload, Download, FileJson, AlertCircle, CheckCircle, RotateCcw, Copy, FileText, Table } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 import type { Ontology, DataBinding } from '../data/ontology';
 
@@ -39,11 +39,12 @@ const sampleSchema = `{
 }`;
 
 export function ImportExportModal({ onClose }: ImportExportModalProps) {
-  const { currentOntology, loadOntology, resetToDefault, exportOntology } = useAppStore();
+  const { currentOntology, dataBindings, loadOntology, resetToDefault, exportOntology } = useAppStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'json' | 'yaml' | 'csv'>('json');
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -86,16 +87,110 @@ export function ImportExportModal({ onClose }: ImportExportModalProps) {
   };
 
   const handleExport = () => {
-    const jsonContent = exportOntology();
-    const blob = new Blob([jsonContent], { type: 'application/json' });
+    let content: string;
+    let mimeType: string;
+    let extension: string;
+
+    if (exportFormat === 'yaml') {
+      content = exportAsYAML();
+      mimeType = 'text/yaml';
+      extension = 'yaml';
+    } else if (exportFormat === 'csv') {
+      content = exportAsCSV();
+      mimeType = 'text/csv';
+      extension = 'csv';
+    } else {
+      content = exportOntology();
+      mimeType = 'application/json';
+      extension = 'json';
+    }
+
+    const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${currentOntology.name.toLowerCase().replace(/\s+/g, '-')}-ontology.json`;
+    link.download = `${currentOntology.name.toLowerCase().replace(/\s+/g, '-')}-ontology.${extension}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  // Simple YAML exporter (no external dependencies)
+  const exportAsYAML = (): string => {
+    const indent = (level: number) => '  '.repeat(level);
+    let yaml = '';
+
+    yaml += 'ontology:\n';
+    yaml += `${indent(1)}name: "${currentOntology.name}"\n`;
+    yaml += `${indent(1)}description: "${currentOntology.description || ''}"\n`;
+    yaml += `${indent(1)}entityTypes:\n`;
+
+    for (const entity of currentOntology.entityTypes) {
+      yaml += `${indent(2)}- id: "${entity.id}"\n`;
+      yaml += `${indent(3)}name: "${entity.name}"\n`;
+      yaml += `${indent(3)}description: "${entity.description || ''}"\n`;
+      yaml += `${indent(3)}icon: "${entity.icon}"\n`;
+      yaml += `${indent(3)}color: "${entity.color}"\n`;
+      yaml += `${indent(3)}properties:\n`;
+      for (const prop of entity.properties) {
+        yaml += `${indent(4)}- name: "${prop.name}"\n`;
+        yaml += `${indent(5)}type: "${prop.type}"\n`;
+        if (prop.isIdentifier) yaml += `${indent(5)}isIdentifier: true\n`;
+      }
+    }
+
+    yaml += `${indent(1)}relationships:\n`;
+    for (const rel of currentOntology.relationships) {
+      yaml += `${indent(2)}- id: "${rel.id}"\n`;
+      yaml += `${indent(3)}name: "${rel.name}"\n`;
+      yaml += `${indent(3)}from: "${rel.from}"\n`;
+      yaml += `${indent(3)}to: "${rel.to}"\n`;
+      yaml += `${indent(3)}cardinality: "${rel.cardinality}"\n`;
+    }
+
+    if (dataBindings.length > 0) {
+      yaml += '\nbindings:\n';
+      for (const binding of dataBindings) {
+        yaml += `${indent(1)}- entityTypeId: "${binding.entityTypeId}"\n`;
+        yaml += `${indent(2)}source: "${binding.source}"\n`;
+      }
+    }
+
+    return yaml;
+  };
+
+  // Export entities and relationships as CSV tables
+  const exportAsCSV = (): string => {
+    let csv = '';
+
+    // Entity Types table
+    csv += '# ENTITY TYPES\n';
+    csv += 'id,name,description,icon,color,properties\n';
+    for (const entity of currentOntology.entityTypes) {
+      const props = entity.properties.map(p => p.name).join(';');
+      csv += `"${entity.id}","${entity.name}","${entity.description || ''}","${entity.icon}","${entity.color}","${props}"\n`;
+    }
+
+    csv += '\n';
+
+    // Relationships table
+    csv += '# RELATIONSHIPS\n';
+    csv += 'id,name,from,to,cardinality,description\n';
+    for (const rel of currentOntology.relationships) {
+      csv += `"${rel.id}","${rel.name}","${rel.from}","${rel.to}","${rel.cardinality}","${rel.description || ''}"\n`;
+    }
+
+    // Properties detail table
+    csv += '\n# PROPERTIES BY ENTITY\n';
+    csv += 'entity_id,property_name,property_type,is_identifier\n';
+    for (const entity of currentOntology.entityTypes) {
+      for (const prop of entity.properties) {
+        csv += `"${entity.id}","${prop.name}","${prop.type}","${prop.isIdentifier || false}"\n`;
+      }
+    }
+
+    return csv;
   };
 
   const handleCopySchema = () => {
@@ -255,10 +350,8 @@ export function ImportExportModal({ onClose }: ImportExportModalProps) {
               background: 'var(--bg-tertiary)', 
               borderRadius: 'var(--radius-lg)',
               border: '2px solid transparent',
-              textAlign: 'center',
-              cursor: 'pointer'
+              textAlign: 'center'
             }}
-            onClick={handleExport}
           >
             <div style={{ 
               width: 48, 
@@ -272,10 +365,73 @@ export function ImportExportModal({ onClose }: ImportExportModalProps) {
             }}>
               <Download size={24} color="var(--ms-green)" />
             </div>
-            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Export Current</div>
-            <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-              Download as JSON file
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Export Current</div>
+            
+            {/* Format Selector */}
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 12 }}>
+              <button
+                onClick={() => setExportFormat('json')}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: 11,
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: exportFormat === 'json' ? 'var(--ms-blue)' : 'var(--bg-secondary)',
+                  color: exportFormat === 'json' ? 'white' : 'var(--text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}
+              >
+                <FileJson size={12} />
+                JSON
+              </button>
+              <button
+                onClick={() => setExportFormat('yaml')}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: 11,
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: exportFormat === 'yaml' ? 'var(--ms-purple)' : 'var(--bg-secondary)',
+                  color: exportFormat === 'yaml' ? 'white' : 'var(--text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}
+              >
+                <FileText size={12} />
+                YAML
+              </button>
+              <button
+                onClick={() => setExportFormat('csv')}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: 11,
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: exportFormat === 'csv' ? 'var(--ms-green)' : 'var(--bg-secondary)',
+                  color: exportFormat === 'csv' ? 'white' : 'var(--text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}
+              >
+                <Table size={12} />
+                CSV
+              </button>
             </div>
+            
+            <button 
+              className="btn btn-primary"
+              onClick={handleExport}
+              style={{ width: '100%' }}
+            >
+              Download .{exportFormat}
+            </button>
           </div>
         </div>
 
