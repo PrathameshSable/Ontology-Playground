@@ -1,0 +1,17 @@
+{
+  "name": "ontology-quest-api",
+  "version": "1.0.0",
+  "description": "Azure Functions API for Ontology Quest",
+  "scripts": {
+    "build": "tsc",
+    "start": "func start"
+  },
+  "dependencies": {
+    "openai": "^4.20.0"
+  },
+  "devDependencies": {
+    "@azure/functions": "^4.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

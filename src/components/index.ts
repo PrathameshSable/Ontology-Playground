@@ -9,4 +9,5 @@ export { HelpModal } from './HelpModal';
 export { DataSourcesModal } from './DataSourcesModal';
 export { ImportExportModal } from './ImportExportModal';
 export { GalleryModal } from './GalleryModal';
+export { NLBuilderModal } from './NLBuilderModal';
 export { Toast } from './Toast';
