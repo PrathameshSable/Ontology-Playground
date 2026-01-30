@@ -13,6 +13,7 @@ import {
   ImportExportModal,
   GalleryModal,
   NLBuilderModal,
+  OntologySummaryModal,
   Toast
 } from './components';
 import { useAppStore } from './store/appStore';
@@ -25,6 +26,7 @@ function App() {
   const [showImportExport, setShowImportExport] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
   const [showNLBuilder, setShowNLBuilder] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
   const [toast, setToast] = useState<{ message: string; icon: string } | null>(null);
   const { darkMode, earnedBadges } = useAppStore();
 
@@ -49,7 +51,8 @@ function App() {
         onDataSourcesClick={() => setShowDataSources(true)}
         onImportExportClick={() => setShowImportExport(true)}
         onGalleryClick={() => setShowGallery(true)}
-        onNLBuilderClick={() => setShowNLBuilder(true)} 
+        onNLBuilderClick={() => setShowNLBuilder(true)}
+        onSummaryClick={() => setShowSummary(true)}
       />
       <QuestPanel />
       <OntologyGraph />
@@ -81,6 +84,10 @@ function App() {
 
       <AnimatePresence>
         {showNLBuilder && <NLBuilderModal onClose={() => setShowNLBuilder(false)} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSummary && <OntologySummaryModal onClose={() => setShowSummary(false)} />}
       </AnimatePresence>
 
       <AnimatePresence>

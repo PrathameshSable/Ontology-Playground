@@ -10,4 +10,5 @@ export { DataSourcesModal } from './DataSourcesModal';
 export { ImportExportModal } from './ImportExportModal';
 export { GalleryModal } from './GalleryModal';
 export { NLBuilderModal } from './NLBuilderModal';
+export { OntologySummaryModal } from './OntologySummaryModal';
 export { Toast } from './Toast';
