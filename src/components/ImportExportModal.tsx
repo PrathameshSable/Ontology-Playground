@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { X, Upload, Download, FileJson, AlertCircle, CheckCircle, RotateCcw, Copy, FileText, Table } from 'lucide-react';
+import { X, Upload, Download, FileJson, AlertCircle, CheckCircle, RotateCcw, Copy, FileText, Table, Share2 } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 import type { Ontology, DataBinding } from '../data/ontology';
 
@@ -44,7 +44,7 @@ export function ImportExportModal({ onClose }: ImportExportModalProps) {
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [copied, setCopied] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'json' | 'yaml' | 'csv'>('json');
+  const [exportFormat, setExportFormat] = useState<'json' | 'yaml' | 'csv' | 'rdf'>('json');
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -99,6 +99,10 @@ export function ImportExportModal({ onClose }: ImportExportModalProps) {
       content = exportAsCSV();
       mimeType = 'text/csv';
       extension = 'csv';
+    } else if (exportFormat === 'rdf') {
+      content = exportAsRDF();
+      mimeType = 'text/turtle';
+      extension = 'ttl';
     } else {
       content = exportOntology();
       mimeType = 'application/json';
@@ -191,6 +195,132 @@ export function ImportExportModal({ onClose }: ImportExportModalProps) {
     }
 
     return csv;
+  };
+
+  // Export as RDF/Turtle format for MS Fabric integration
+  const exportAsRDF = (): string => {
+    const ontologyName = currentOntology.name.toLowerCase().replace(/\s+/g, '-');
+    const baseUri = `http://example.org/ontology/${ontologyName}/`;
+    
+    let rdf = '';
+    
+    // Prefixes
+    rdf += '@prefix owl: <http://www.w3.org/2002/07/owl#> .\n';
+    rdf += '@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n';
+    rdf += '@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n';
+    rdf += `@prefix : <${baseUri}> .\n`;
+    rdf += '\n';
+    
+    // Ontology declaration
+    rdf += `<${baseUri}> a owl:Ontology ;\n`;
+    rdf += `    rdfs:label "${currentOntology.name}" ;\n`;
+    rdf += `    rdfs:comment "${currentOntology.description || ''}" .\n`;
+    rdf += '\n';
+    
+    // Map property types to XSD datatypes
+    const xsdTypeMap: Record<string, string> = {
+      'string': 'xsd:string',
+      'integer': 'xsd:integer',
+      'decimal': 'xsd:decimal',
+      'date': 'xsd:date',
+      'datetime': 'xsd:dateTime',
+      'boolean': 'xsd:boolean',
+      'enum': 'xsd:string'
+    };
+    
+    // Entity Types as OWL Classes
+    rdf += '# =====================\n';
+    rdf += '# Entity Types (Classes)\n';
+    rdf += '# =====================\n\n';
+    
+    for (const entity of currentOntology.entityTypes) {
+      const className = entity.id.charAt(0).toUpperCase() + entity.id.slice(1);
+      rdf += `:${className} a owl:Class ;\n`;
+      rdf += `    rdfs:label "${entity.name}" ;\n`;
+      rdf += `    rdfs:comment "${entity.description || ''}" .\n`;
+      rdf += '\n';
+    }
+    
+    // Data Properties (entity properties)
+    rdf += '# ================\n';
+    rdf += '# Data Properties\n';
+    rdf += '# ================\n\n';
+    
+    for (const entity of currentOntology.entityTypes) {
+      const className = entity.id.charAt(0).toUpperCase() + entity.id.slice(1);
+      
+      for (const prop of entity.properties) {
+        const propName = `${entity.id}_${prop.name}`;
+        const xsdType = xsdTypeMap[prop.type] || 'xsd:string';
+        
+        rdf += `:${propName} a owl:DatatypeProperty ;\n`;
+        rdf += `    rdfs:label "${prop.name}" ;\n`;
+        rdf += `    rdfs:domain :${className} ;\n`;
+        rdf += `    rdfs:range ${xsdType}`;
+        
+        if (prop.description) {
+          rdf += ` ;\n    rdfs:comment "${prop.description}"`;
+        }
+        if (prop.isIdentifier) {
+          rdf += ` ;\n    rdfs:comment "Identifier property"`;
+        }
+        rdf += ' .\n\n';
+      }
+    }
+    
+    // Object Properties (relationships)
+    rdf += '# ==================\n';
+    rdf += '# Object Properties\n';
+    rdf += '# ==================\n\n';
+    
+    for (const rel of currentOntology.relationships) {
+      const fromClass = rel.from.charAt(0).toUpperCase() + rel.from.slice(1);
+      const toClass = rel.to.charAt(0).toUpperCase() + rel.to.slice(1);
+      
+      rdf += `:${rel.name} a owl:ObjectProperty ;\n`;
+      rdf += `    rdfs:label "${rel.name}" ;\n`;
+      rdf += `    rdfs:domain :${fromClass} ;\n`;
+      rdf += `    rdfs:range :${toClass}`;
+      
+      if (rel.description) {
+        rdf += ` ;\n    rdfs:comment "${rel.description}"`;
+      }
+      
+      // Add cardinality as annotation
+      rdf += ` ;\n    rdfs:comment "Cardinality: ${rel.cardinality}"`;
+      rdf += ' .\n\n';
+      
+      // Add relationship attributes as separate data properties
+      if (rel.attributes && rel.attributes.length > 0) {
+        for (const attr of rel.attributes) {
+          const attrName = `${rel.name}_${attr.name}`;
+          rdf += `:${attrName} a owl:DatatypeProperty ;\n`;
+          rdf += `    rdfs:label "${attr.name}" ;\n`;
+          rdf += `    rdfs:comment "Relationship attribute for ${rel.name}" .\n\n`;
+        }
+      }
+    }
+    
+    // Data Bindings as annotations (if available)
+    if (dataBindings.length > 0) {
+      rdf += '# =============\n';
+      rdf += '# Data Bindings\n';
+      rdf += '# =============\n\n';
+      
+      for (const binding of dataBindings) {
+        const className = binding.entityTypeId.charAt(0).toUpperCase() + binding.entityTypeId.slice(1);
+        rdf += `# Binding for ${className}:\n`;
+        rdf += `# Source: ${binding.source}\n`;
+        rdf += `# Table: ${binding.table}\n`;
+        rdf += `# Column Mappings:\n`;
+        for (const [propName, colName] of Object.entries(binding.columnMappings)) {
+          rdf += `#   ${propName} -> ${colName}\n`;
+        }
+        rdf += '\n';
+      }
+    }
+    
+    return rdf;
   };
 
   const handleCopySchema = () => {
@@ -423,6 +553,25 @@ export function ImportExportModal({ onClose }: ImportExportModalProps) {
                 <Table size={12} />
                 CSV
               </button>
+              <button
+                onClick={() => setExportFormat('rdf')}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: 11,
+                  borderRadius: 'var(--radius-sm)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: exportFormat === 'rdf' ? '#E74C3C' : 'var(--bg-secondary)',
+                  color: exportFormat === 'rdf' ? 'white' : 'var(--text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}
+                title="RDF/Turtle format for MS Fabric"
+              >
+                <Share2 size={12} />
+                RDF
+              </button>
             </div>
             
             <button 
@@ -430,7 +579,7 @@ export function ImportExportModal({ onClose }: ImportExportModalProps) {
               onClick={handleExport}
               style={{ width: '100%' }}
             >
-              Download .{exportFormat}
+              Download .{exportFormat === 'rdf' ? 'ttl' : exportFormat}
             </button>
           </div>
         </div>
