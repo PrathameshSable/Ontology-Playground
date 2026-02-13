@@ -12,41 +12,41 @@ The current RDF export is inline in `ImportExportModal.tsx` and there is no RDF
 **import**. RDF should become a first-class serialization format.
 
 ### 1.1 Extract RDF serialization module
-- [ ] Create `src/lib/rdf/serializer.ts` — move the existing `exportAsRDF()`
+- [x] Create `src/lib/rdf/serializer.ts` — move the existing `exportAsRDF()`
   logic out of `ImportExportModal.tsx` into a pure function
   `serializeToRDF(ontology, bindings) → string`
-- [ ] Create `src/lib/rdf/parser.ts` — implement `parseRDF(rdfXmlString) →
+- [x] Create `src/lib/rdf/parser.ts` — implement `parseRDF(rdfXmlString) →
   { ontology, bindings }` using a lightweight XML parser (browser
   `DOMParser`; no heavy deps)
-- [ ] Support OWL classes → EntityTypes, DatatypeProperties → Properties,
+- [x] Support OWL classes → EntityTypes, DatatypeProperties → Properties,
   ObjectProperties → Relationships
-- [ ] Round-trip fidelity: `parse(serialize(ontology))` must produce an
+- [x] Round-trip fidelity: `parse(serialize(ontology))` must produce an
   equivalent ontology
 
 ### 1.2 Wire RDF import into UI
-- [ ] In `ImportExportModal.tsx`, accept `.rdf` and `.owl` files in the file
+- [x] In `ImportExportModal.tsx`, accept `.rdf` and `.owl` files in the file
   input
-- [ ] Detect format by extension and/or XML prologue, route to the RDF parser
-- [ ] Show validation errors inline if the RDF is malformed
+- [x] Detect format by extension and/or XML prologue, route to the RDF parser
+- [x] Show validation errors inline if the RDF is malformed
 
 ### 1.3 Full test battery
-- [ ] Set up Vitest (`vitest`, `@testing-library/react`,
+- [x] Set up Vitest (`vitest`, `@testing-library/react`,
   `@testing-library/jest-dom`)
-- [ ] Unit tests for `serializer.ts`:
+- [x] Unit tests for `serializer.ts`:
   - Empty ontology
   - Ontology with all property types (string, integer, decimal, date, etc.)
   - Ontology with relationship attributes
   - XML special character escaping (& < > " ')
   - Data bindings preservation in comments
-- [ ] Unit tests for `parser.ts`:
+- [x] Unit tests for `parser.ts`:
   - Valid RDF/OWL input → correct Ontology shape
   - Missing required fields → descriptive error
   - Namespace handling (custom prefixes, default namespace)
   - Malformed XML → graceful error
-- [ ] Round-trip tests: serialize → parse → deep-equal for every sample ontology
+- [x] Round-trip tests: serialize → parse → deep-equal for every sample ontology
   in `sampleOntologies.ts` and `cosmicCoffeeOntology`
 - [ ] Integration test: import an RDF file via the modal, verify store state
-- [ ] Add `"test": "vitest run"` and `"test:watch": "vitest"` to
+- [x] Add `"test": "vitest run"` and `"test:watch": "vitest"` to
   `package.json` scripts
 
 ---
