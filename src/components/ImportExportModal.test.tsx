@@ -55,7 +55,7 @@ const testOntology: Ontology = {
       name: 'produces',
       from: 'factory',
       to: 'widget',
-      cardinality: '1:n' as const,
+      cardinality: 'one-to-many' as const,
       description: 'Factory produces widgets',
     },
   ],

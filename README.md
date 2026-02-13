@@ -55,40 +55,50 @@ Visit http://localhost:5173
 npm run build
 ```
 
-Output is in the `dist/` folder.
+Output is in the `build/` folder.
 
-## Deploy to Azure Static Web Apps
-
-### Option 1: Azure Portal
-
-1. Create a new Static Web App in Azure Portal
-2. Connect to your GitHub repository
-3. Set build configuration:
-   - **App location:** `ontology-quest`
-   - **Output location:** `dist`
-   - **App build command:** `npm run build`
-
-### Option 2: GitHub Actions
-
-The project includes a workflow at `.github/workflows/azure-static-web-apps.yml`.
-
-1. Create a Static Web App in Azure Portal
-2. Copy the deployment token
-3. Add it as a GitHub secret: `AZURE_STATIC_WEB_APPS_API_TOKEN`
-4. Push to `main` branch to trigger deployment
-
-### Option 3: Azure CLI
+### Running Tests
 
 ```bash
-# Install SWA CLI
-npm install -g @azure/static-web-apps-cli
-
-# Build
-npm run build
-
-# Deploy
-swa deploy ./dist --deployment-token <YOUR_TOKEN>
+npm test            # single run
+npm run test:watch  # watch mode
 ```
+
+## Deployment
+
+### Azure Static Web Apps (primary)
+
+The repo ships with a GitHub Actions workflow that deploys to Azure SWA on every
+push to `main`.
+
+1. Create a Static Web App in the Azure Portal
+2. Connect to your GitHub repository
+3. Copy the deployment token and add it as the GitHub secret
+   `AZURE_STATIC_WEB_APPS_API_TOKEN_GREEN_PLANT_0BB1D2910`
+4. Push to `main` — the workflow at
+   `.github/workflows/azure-static-web-apps-green-plant-0bb1d2910.yml` handles
+   the rest
+5. PR preview environments are created automatically for pull requests
+
+### GitHub Pages (for forks)
+
+A separate workflow deploys to GitHub Pages, ideal for forks:
+
+1. Fork this repo
+2. Go to **Settings → Pages → Source** and select **GitHub Actions**
+3. Push to `main` — the workflow at `.github/workflows/deploy-ghpages.yml`
+   builds and deploys to `https://<username>.github.io/<repo-name>/`
+
+The `VITE_BASE_PATH` env var is set automatically to `/<repo-name>/` during the
+GitHub Pages build so asset paths resolve correctly.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VITE_ENABLE_AI_BUILDER` | `false` | Enable the Azure OpenAI ontology builder |
+| `VITE_ENABLE_LEGACY_FORMATS` | `false` | Enable JSON/YAML/CSV import/export formats |
+| `VITE_BASE_PATH` | `/` | Base path for the app (set automatically for GitHub Pages) |
 
 ## Project Structure
 

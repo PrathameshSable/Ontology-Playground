@@ -4,15 +4,18 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: process.env.VITE_BASE_PATH || '/',
   build: {
     outDir: 'build'
   },
   server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:7071',
-        changeOrigin: true
-      }
-    }
+    proxy: process.env.VITE_ENABLE_AI_BUILDER === 'true'
+      ? {
+          '/api': {
+            target: 'http://localhost:7071',
+            changeOrigin: true
+          }
+        }
+      : undefined
   }
 })
