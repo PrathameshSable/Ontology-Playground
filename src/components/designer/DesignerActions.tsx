@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { Download, AlertTriangle, CheckCircle, Upload } from 'lucide-react';
+import { Download, AlertTriangle, CheckCircle, Upload, Github } from 'lucide-react';
 import { useDesignerStore } from '../../store/designerStore';
 import type { ValidationError } from '../../store/designerStore';
 import { useAppStore } from '../../store/appStore';
 import { serializeToRDF } from '../../lib/rdf/serializer';
 import { navigate } from '../../lib/router';
+import { SubmitCatalogueModal } from './SubmitCatalogueModal';
+
+const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID || '';
 
 export function DesignerActions() {
   const { ontology, validationErrors, validate, resetDraft } = useDesignerStore();
   const loadOntology = useAppStore((s) => s.loadOntology);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   const handleValidate = () => {
     const errors = validate();
@@ -53,6 +57,15 @@ export function DesignerActions() {
     setExportMessage(null);
   };
 
+  const handleSubmitToCatalogue = () => {
+    const errors = validate();
+    if (errors.length > 0) {
+      setExportMessage(null);
+      return;
+    }
+    setShowSubmitModal(true);
+  };
+
   return (
     <div className="designer-actions">
       <div className="designer-actions-row">
@@ -67,6 +80,11 @@ export function DesignerActions() {
         </button>
         <button className="designer-action-btn primary" onClick={handleLoadInPlayground}>
           <Upload size={14} /> Load in Playground
+        </button>
+      </div>
+      <div className="designer-actions-row">
+        <button className="designer-action-btn submit" onClick={handleSubmitToCatalogue} title={!GITHUB_CLIENT_ID ? 'Download RDF to submit manually' : 'Submit as a pull request'}>
+          <Github size={14} /> Submit to Catalogue
         </button>
       </div>
 
@@ -91,6 +109,11 @@ export function DesignerActions() {
         <div className="designer-success-msg">
           <CheckCircle size={14} /> {exportMessage}
         </div>
+      )}
+
+      {/* Submit to Catalogue modal */}
+      {showSubmitModal && (
+        <SubmitCatalogueModal onClose={() => setShowSubmitModal(false)} />
       )}
     </div>
   );
