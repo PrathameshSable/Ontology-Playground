@@ -13,6 +13,7 @@ import {
   ImportExportModal,
   GalleryModal,
   OntologySummaryModal,
+  OntologyDesigner,
   Toast
 } from './components';
 import { useAppStore } from './store/appStore';
@@ -90,6 +91,15 @@ function App() {
     navigate({ page: 'catalogue' });
   }, []);
 
+  const openDesigner = useCallback(() => {
+    navigate({ page: 'designer' });
+  }, []);
+
+  // Designer is a full-page view — render it instead of the main layout
+  if (route.page === 'designer') {
+    return <OntologyDesigner route={route} />;
+  }
+
   return (
     <div className={`app-container ${darkMode ? '' : 'light-theme'}`}>
       <Header 
@@ -97,6 +107,7 @@ function App() {
         onDataSourcesClick={() => setShowDataSources(true)}
         onImportExportClick={() => setShowImportExport(true)}
         onGalleryClick={openGallery}
+        onDesignerClick={openDesigner}
         onNLBuilderClick={AI_BUILDER_ENABLED ? () => setShowNLBuilder(true) : undefined}
         onSummaryClick={() => setShowSummary(true)}
       />

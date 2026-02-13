@@ -54,6 +54,24 @@ describe('parseHash', () => {
     expect(parseHash('#/embed')).toEqual({ page: 'home' });
   });
 
+  it('parses designer route without id (new ontology)', () => {
+    expect(parseHash('#/designer')).toEqual({ page: 'designer', ontologyId: undefined });
+  });
+
+  it('parses designer route with path-based id', () => {
+    expect(parseHash('#/designer/official/cosmic-coffee')).toEqual({
+      page: 'designer',
+      ontologyId: 'official/cosmic-coffee',
+    });
+  });
+
+  it('rejects designer route with path traversal', () => {
+    expect(parseHash('#/designer/../../etc/passwd')).toEqual({
+      page: 'designer',
+      ontologyId: undefined,
+    });
+  });
+
   it('handles leading slash variations', () => {
     expect(parseHash('#catalogue/test')).toEqual({ page: 'catalogue', ontologyId: 'test' });
   });
@@ -146,6 +164,16 @@ describe('routeToHash', () => {
       '#/embed/official/cosmic-coffee',
     );
   });
+
+  it('converts designer route without id', () => {
+    expect(routeToHash({ page: 'designer' })).toBe('#/designer');
+  });
+
+  it('converts designer route with id', () => {
+    expect(routeToHash({ page: 'designer', ontologyId: 'official/cosmic-coffee' })).toBe(
+      '#/designer/official/cosmic-coffee',
+    );
+  });
 });
 
 describe('roundtrip', () => {
@@ -155,6 +183,8 @@ describe('roundtrip', () => {
     { page: 'catalogue' as const, ontologyId: 'official/healthcare' },
     { page: 'catalogue' as const, ontologyId: 'community/alice/finance-ledger' },
     { page: 'embed' as const, ontologyId: 'official/finance' },
+    { page: 'designer' as const },
+    { page: 'designer' as const, ontologyId: 'official/cosmic-coffee' },
   ];
 
   for (const route of routes) {

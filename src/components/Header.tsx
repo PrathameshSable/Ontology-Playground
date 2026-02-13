@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { useAppStore } from '../store/appStore';
 import { useRoute } from '../hooks/useRoute';
-import { Moon, Sun, Database, Trophy, HelpCircle, FileJson, LayoutGrid, Sparkles, FileText, Share2 } from 'lucide-react';
+import { Moon, Sun, Database, Trophy, HelpCircle, FileJson, LayoutGrid, Sparkles, FileText, Share2, PenTool } from 'lucide-react';
 
 interface HeaderProps {
   onHelpClick: () => void;
   onDataSourcesClick: () => void;
   onImportExportClick: () => void;
   onGalleryClick: () => void;
+  onDesignerClick: () => void;
   onNLBuilderClick?: () => void;
   onSummaryClick: () => void;
 }
 
-export function Header({ onHelpClick, onDataSourcesClick, onImportExportClick, onGalleryClick, onNLBuilderClick, onSummaryClick }: HeaderProps) {
+export function Header({ onHelpClick, onDataSourcesClick, onImportExportClick, onGalleryClick, onDesignerClick, onNLBuilderClick, onSummaryClick }: HeaderProps) {
   const { darkMode, toggleDarkMode, totalPoints, earnedBadges, currentOntology } = useAppStore();
   const route = useRoute();
   const [copied, setCopied] = useState(false);
@@ -82,6 +83,9 @@ export function Header({ onHelpClick, onDataSourcesClick, onImportExportClick, o
         )}
         <button className="icon-btn" onClick={onGalleryClick} title="Ontology Gallery">
           <LayoutGrid size={20} />
+        </button>
+        <button className="icon-btn" onClick={onDesignerClick} title="Ontology Designer">
+          <PenTool size={20} />
         </button>
         <button className="icon-btn" onClick={onImportExportClick} title="Import / Export Ontology">
           <FileJson size={20} />

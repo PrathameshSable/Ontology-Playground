@@ -12,4 +12,5 @@ export { GalleryModal } from './GalleryModal';
 // NLBuilderModal is not exported here — it is dynamically imported in App.tsx
 // only when the VITE_ENABLE_AI_BUILDER feature flag is enabled.
 export { OntologySummaryModal } from './OntologySummaryModal';
+export { OntologyDesigner } from './OntologyDesigner';
 export { Toast } from './Toast';
