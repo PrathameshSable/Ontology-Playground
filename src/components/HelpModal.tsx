@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { X, MousePointer, Target, MessageSquare, Link2, Lightbulb } from 'lucide-react';
+import { X, MousePointer, Target, MessageSquare, Link2, Lightbulb, Command } from 'lucide-react';
 
 interface HelpModalProps {
   onClose: () => void;
@@ -89,6 +89,20 @@ export function HelpModal({ onClose }: HelpModalProps) {
                 An ontology is a shared, machine-understandable vocabulary of your business. It defines entity types (like Customer, Product), 
                 their properties, and relationships. This demo uses a fictional "Cosmic Coffee Company" to illustrate these concepts.
               </p>
+            </div>
+          </div>
+
+          <div className="feature-card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <Command size={20} color="var(--ms-blue)" />
+              <span className="feature-title" style={{ marginBottom: 0 }}>Keyboard Shortcuts</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 16px', fontSize: 13, color: 'var(--text-secondary)' }}>
+              <kbd className="help-kbd">⌘K</kbd><span>Open command palette</span>
+              <kbd className="help-kbd">?</kbd><span>Open this help dialog</span>
+              <kbd className="help-kbd">Esc</kbd><span>Close any dialog</span>
+              <kbd className="help-kbd">↑ ↓</kbd><span>Navigate palette results</span>
+              <kbd className="help-kbd">↵</kbd><span>Select palette command</span>
             </div>
           </div>
         </div>
