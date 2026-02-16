@@ -2362,13 +2362,14 @@ body {
    ======================================================================== */
 
 .learn-page {
-  width: 100%;
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-primary);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .learn-header {
