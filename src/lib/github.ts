@@ -8,14 +8,15 @@
  *
  * The GitHub OAuth endpoints (github.com/login/device/code and
  * github.com/login/oauth/access_token) don't support CORS. In dev we proxy
- * them through Vite (/__github/…). In production the calls go direct — deploy
- * behind a CORS-friendly proxy or Azure SWA route rewrite.
+ * them through Vite (/__github/…). In production we proxy through an Azure
+ * Function at /api/github-oauth/….
  */
 
 const GITHUB_API = 'https://api.github.com';
 
 // In dev, Vite proxies /__github/* → github.com/*
-const GITHUB_OAUTH_BASE = import.meta.env.DEV ? '/__github' : 'https://github.com';
+// In prod, Azure Function proxies /api/github-oauth/* → github.com/*
+const GITHUB_OAUTH_BASE = import.meta.env.DEV ? '/__github' : '/api/github-oauth';
 
 // The upstream repo that the catalogue lives in.
 // Change these if the repo moves.
