@@ -202,7 +202,6 @@ ontology-quest/
 | [Embedding Guide](docs/embed-guide.md) | How to embed interactive ontology widgets on any web page |
 | [GitHub OAuth Setup](docs/github-oauth-setup.md) | How to configure GitHub OAuth for one-click catalogue PRs |
 | [Embed Security](docs/embed-security.md) | Security model for the embeddable widget |
-| [Feature Summary](docs/feature-summary.md) | Detailed write-up of every feature and how it helps Fabric IQ adoption |
 
 ## Technologies
 
