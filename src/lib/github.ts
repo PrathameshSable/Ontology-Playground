@@ -5,9 +5,17 @@
  *   VITE_GITHUB_CLIENT_ID — OAuth app client ID (required to enable the feature)
  *
  * All API calls use the public GitHub API (api.github.com).
+ *
+ * The GitHub OAuth endpoints (github.com/login/device/code and
+ * github.com/login/oauth/access_token) don't support CORS. In dev we proxy
+ * them through Vite (/__github/…). In production the calls go direct — deploy
+ * behind a CORS-friendly proxy or Azure SWA route rewrite.
  */
 
 const GITHUB_API = 'https://api.github.com';
+
+// In dev, Vite proxies /__github/* → github.com/*
+const GITHUB_OAUTH_BASE = import.meta.env.DEV ? '/__github' : 'https://github.com';
 
 // The upstream repo that the catalogue lives in.
 // Change these if the repo moves.
@@ -80,7 +88,7 @@ export function clearToken(): void {
  * direct the user to `verification_uri`, then call `pollForToken()`.
  */
 export async function startDeviceFlow(clientId: string): Promise<DeviceCodeResponse> {
-  const res = await fetch('https://github.com/login/device/code', {
+  const res = await fetch(`${GITHUB_OAUTH_BASE}/login/device/code`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -115,7 +123,7 @@ export async function pollForToken(
     await wait(pollInterval);
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
-    const res = await fetch('https://github.com/login/oauth/access_token', {
+    const res = await fetch(`${GITHUB_OAUTH_BASE}/login/oauth/access_token`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',

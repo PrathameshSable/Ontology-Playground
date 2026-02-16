@@ -55,7 +55,7 @@ describe('startDeviceFlow', () => {
     const result = await startDeviceFlow('client-id-test');
     expect(result).toEqual(payload);
     expect(fetch).toHaveBeenCalledWith(
-      'https://github.com/login/device/code',
+      expect.stringContaining('/login/device/code'),
       expect.objectContaining({ method: 'POST' }),
     );
   });
