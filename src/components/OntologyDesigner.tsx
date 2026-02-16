@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useDesignerStore } from '../store/designerStore';
 import { useAppStore } from '../store/appStore';
 import { navigate } from '../lib/router';
-import { EntityForm, RelationshipForm, DesignerPreview, DesignerToolbar, DesignerValidation } from './designer';
+import { EntityForm, RelationshipForm, DesignerPreview, DesignerToolbar, DesignerValidation, TemplatePicker } from './designer';
 import type { Catalogue } from '../types/catalogue';
 import type { Route } from '../lib/router';
 
@@ -14,6 +14,7 @@ interface OntologyDesignerProps {
 export function OntologyDesigner({ route }: OntologyDesignerProps) {
   const { ontology, setOntologyName, setOntologyDescription, loadDraft, undo, redo } = useDesignerStore();
   const darkMode = useAppStore((s) => s.darkMode);
+  const isEmpty = ontology.entityTypes.length === 0 && ontology.relationships.length === 0;
 
   // Keyboard shortcuts: Cmd/Ctrl+Z → undo, Cmd/Ctrl+Shift+Z → redo
   useEffect(() => {
@@ -81,6 +82,7 @@ export function OntologyDesigner({ route }: OntologyDesignerProps) {
       <div className="designer-split">
         {/* Left: editor forms */}
         <div className="designer-sidebar">
+          {isEmpty && <TemplatePicker />}
           <DesignerValidation />
           <EntityForm />
           <RelationshipForm />
