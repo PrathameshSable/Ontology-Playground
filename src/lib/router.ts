@@ -51,8 +51,8 @@ function sanitizeOntologyId(raw: string): string | undefined {
 
 /** Parse a hash string (e.g. "#/catalogue/official/cosmic-coffee") into a Route. */
 export function parseHash(hash: string): Route {
-  // Strip leading "#" and optional leading "/"
-  const path = hash.replace(/^#\/?/, '');
+  // Strip leading "#" and optional leading "/", then strip query params (e.g. ?slide=3)
+  const path = hash.replace(/^#\/?/, '').replace(/\?.*$/, '');
   const segments = path.split('/').filter(Boolean);
 
   if (segments[0] === 'catalogue') {

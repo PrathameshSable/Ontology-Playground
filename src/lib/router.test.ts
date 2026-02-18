@@ -107,6 +107,14 @@ describe('parseHash', () => {
     });
   });
 
+  it('strips query params from learn route hash', () => {
+    expect(parseHash('#/learn/my-course/my-article?slide=4')).toEqual({
+      page: 'learn',
+      courseSlug: 'my-course',
+      articleSlug: 'my-article',
+    });
+  });
+
   it('parses share route with valid base64 data', () => {
     expect(parseHash('#/share/eJxLzs8FAAPcAbQ')).toEqual({
       page: 'share',
