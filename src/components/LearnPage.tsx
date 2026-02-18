@@ -394,9 +394,11 @@ function cyStyles(colors: { nodeText: string; edgeColor: string; edgeText: strin
   ];
 }
 
+let fcoseRegistered = false;
+
 /** Mount a Cytoscape instance into a container div.
- *  If `fixedPositions` is provided, nodes with matching IDs use preset positions
- *  and only new nodes go through fcose layout. Returns a promise with the cy instance. */
+ *  If `fixedPositions` covers every node, uses instant `preset` layout.
+ *  Otherwise uses fcose. Returns a promise with the cy instance. */
 function mountGraph(
   container: HTMLElement,
   entry: EmbedEntry,
@@ -406,6 +408,9 @@ function mountGraph(
   fixedPositions?: Map<string, { x: number; y: number }>,
 ): Promise<CyInstance> {
   const newHighlight = '#00C853';
+  const nodeIds = entry.ontology.entityTypes.map((e) => e.id);
+  const allFixed = fixedPositions != null && nodeIds.every((id) => fixedPositions.has(id));
+
   const nodes = entry.ontology.entityTypes.map((e) => {
     const pos = fixedPositions?.get(e.id);
     return {
@@ -423,39 +428,45 @@ function mountGraph(
     ? { nodeText: '#B3B3B3', edgeColor: '#505050', edgeText: '#808080' }
     : { nodeText: '#2A2A2A', edgeColor: '#888888', edgeText: '#555555' };
 
+  // When every node has a known position, use preset layout (instant, no solver)
+  if (allFixed) {
+    return import('cytoscape').then(({ default: cytoscape }) => {
+      const cy = cytoscape({
+        container,
+        elements: [...nodes, ...edges],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        style: cyStyles(colors, newHighlight) as any,
+        layout: { name: 'preset', fit: true, padding: 30 },
+        minZoom: 0.3,
+        maxZoom: 3,
+        userPanningEnabled: true,
+        userZoomingEnabled: true,
+        boxSelectionEnabled: false,
+      });
+      return cy;
+    });
+  }
+
   return import('cytoscape').then(({ default: cytoscape }) =>
     import('cytoscape-fcose').then(({ default: fcose }) => {
-      cytoscape.use(fcose);
-
-      // If we have fixed positions for some nodes, use fcose with constraints
-      // so that pinned nodes stay put and only new nodes get laid out
-      const usePreset = fixedPositions && fixedPositions.size > 0;
-      const layoutCfg = usePreset
-        ? {
-            name: 'fcose',
-            animate: false,
-            fit: true,
-            padding: 30,
-            nodeDimensionsIncludeLabels: true,
-            fixedNodeConstraint: Array.from(fixedPositions!.entries()).map(
-              ([id, pos]) => ({ nodeId: id, position: { x: pos.x, y: pos.y } }),
-            ),
-          }
-        : {
-            name: 'fcose',
-            animate: false,
-            fit: true,
-            padding: 30,
-            nodeDimensionsIncludeLabels: true,
-          };
+      if (!fcoseRegistered) {
+        cytoscape.use(fcose);
+        fcoseRegistered = true;
+      }
 
       const cy = cytoscape({
         container,
         elements: [...nodes, ...edges],
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         style: cyStyles(colors, newHighlight) as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        layout: layoutCfg as any,
+        layout: {
+          name: 'fcose',
+          animate: false,
+          fit: true,
+          padding: 30,
+          nodeDimensionsIncludeLabels: true,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
         minZoom: 0.3,
         maxZoom: 3,
         userPanningEnabled: true,
@@ -615,9 +626,28 @@ function renderEmbedSlot(
     afterBtn.style.color = activeView === 'after' ? activeCol : inactiveCol;
   }
 
+  // Lazily create the before graph on first toggle (avoids layout in a hidden div)
+  let beforeMounting = false;
+  function ensureBeforeGraph() {
+    if (beforeCy || beforeMounting || !prevEntry || !beforeDiv || !afterCy) return;
+    beforeMounting = true;
+    // Extract node positions from the after graph
+    const afterPositions = new Map<string, { x: number; y: number }>();
+    afterCy.nodes().forEach((n) => {
+      afterPositions.set(n.id(), n.position());
+    });
+    // beforeDiv is now visible (display != none), so preset layout works
+    mountGraph(beforeDiv, prevEntry, darkMode, undefined, undefined, afterPositions).then((bcy) => {
+      beforeCy = bcy;
+      beforeMounting = false;
+    });
+  }
+
   function showActiveView() {
     afterDiv.style.display = activeView === 'after' ? '' : 'none';
     if (beforeDiv) beforeDiv.style.display = activeView === 'before' ? '' : 'none';
+    // Lazily mount the before graph the first time it becomes visible
+    if (activeView === 'before') ensureBeforeGraph();
     // Resize the now-visible graph so it fills correctly
     requestAnimationFrame(() => {
       if (activeView === 'after' && afterCy) { afterCy.resize(); afterCy.fit(30); }
@@ -627,21 +657,8 @@ function renderEmbedSlot(
 
   updateToggleStyles();
 
-  // Mount the "after" graph first, then use its positions to pin shared nodes in "before"
+  // Mount only the "after" graph eagerly; "before" is created lazily on first toggle
   mountGraph(afterDiv, entry, darkMode, newEntityIds, newRelIds).then((cy) => {
     afterCy = cy;
-
-    if (!prevEntry || !beforeDiv) return;
-
-    // Extract node positions from the after graph
-    const afterPositions = new Map<string, { x: number; y: number }>();
-    cy.nodes().forEach((n) => {
-      afterPositions.set(n.id(), n.position());
-    });
-
-    // Mount the "before" graph with shared nodes pinned to after-positions
-    mountGraph(beforeDiv, prevEntry, darkMode, undefined, undefined, afterPositions).then((bcy) => {
-      beforeCy = bcy;
-    });
   });
 }
