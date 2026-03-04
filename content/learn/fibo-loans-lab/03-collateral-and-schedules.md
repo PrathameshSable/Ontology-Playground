@@ -4,6 +4,7 @@ slug: collateral-and-schedules
 description: Add security agreements and repayment cadence using FIBO's collateral and payment schedule concepts.
 order: 3
 embed: official/fibo-loans-step-2
+reviewStatus: under-human-review
 ---
 
 ## From contract to structure

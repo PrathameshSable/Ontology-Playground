@@ -4,6 +4,7 @@ slug: servicing-and-payment-history
 description: Extend the model with FIBO servicing organizations and auditable payment events.
 order: 4
 embed: official/fibo-loans-step-3
+reviewStatus: under-human-review
 ---
 
 ## Operational lifecycle

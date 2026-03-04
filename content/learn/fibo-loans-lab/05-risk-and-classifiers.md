@@ -4,6 +4,7 @@ slug: risk-and-classifiers
 description: Add FIBO ownership and lien classifiers to support underwriting and collateral risk analysis.
 order: 5
 embed: official/fibo-loans-step-4
+reviewStatus: under-human-review
 ---
 
 ## Classification layer

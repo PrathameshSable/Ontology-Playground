@@ -4,6 +4,7 @@ slug: core-loan-triad
 description: Model the foundational FIBO loan triangle — Loan, Borrower, and Lender — with properties and relationships.
 order: 2
 embed: official/fibo-loans-step-1
+reviewStatus: under-human-review
 ---
 
 ## The contractual core
