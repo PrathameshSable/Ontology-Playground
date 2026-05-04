@@ -1,8 +1,8 @@
 {
-  "name": "Incident Management Ontology",
+  "name": "Incident Management",
   "description": "Incident Management domain. It aligns with ITIL 4 best practices.",
   "icon": "📦",
-  "category": "other",
+  "category": "general",
   "tags": [],
   "author": "a-villarruel"
 }

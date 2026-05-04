@@ -8,7 +8,7 @@
     xmlns:ont="http://example.org/ontology/incident-management-ontology/">
 
     <owl:Ontology rdf:about="http://example.org/ontology/incident-management-ontology/">
-        <rdfs:label>Incident Management Ontology</rdfs:label>
+        <rdfs:label>Incident Management</rdfs:label>
         <rdfs:comment>Incident Management domain. It aligns with ITIL 4 best practices.</rdfs:comment>
     </owl:Ontology>
 
