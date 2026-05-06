@@ -353,7 +353,7 @@ export function OntologyGraph() {
       cy.$('node').style({ 'color': themeColors.nodeText });
       cy.$('edge').style({ 'color': themeColors.edgeText, 'text-background-color': darkMode ? '#1a1a2e' : '#f5f5f5' });
       // Line/arrow colors: only update non-highlighted edges so path-finder highlights survive
-      cy.$('edge:not(.highlighted)').style({
+      cy.edges().not('.highlighted').style({
         'line-color': themeColors.edgeColor,
         'target-arrow-color': themeColors.edgeColor,
       });

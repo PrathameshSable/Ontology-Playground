@@ -1,7 +1,8 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { GitFork, ChevronDown, ChevronUp, ArrowRight, Search, X } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
-import type { Relationship } from '../data/ontology';
+import { findShortestPath } from '../lib/pathFinder';
+import type { PathNode } from '../lib/pathFinder';
 
 interface PathStep {
   entityId: string;
@@ -11,48 +12,7 @@ interface PathStep {
     id: string;
     name: string;
     cardinality: string;
-    forward: boolean; // true = from→to, false = to→from (traversed backwards)
   };
-}
-
-type BFSNode = { entityId: string; via?: { rel: Relationship; forward: boolean } };
-
-/** BFS over the undirected relationship graph — returns the shortest hop path */
-function findShortestPath(
-  fromId: string,
-  toId: string,
-  relationships: Relationship[]
-): BFSNode[] | null {
-  if (fromId === toId) return null;
-
-  // Build adjacency: entityId → [{ neighbourId, rel }]
-  const adj: Record<string, { neighbourId: string; rel: Relationship; forward: boolean }[]> = {};
-  for (const rel of relationships) {
-    if (!adj[rel.from]) adj[rel.from] = [];
-    if (!adj[rel.to]) adj[rel.to] = [];
-    adj[rel.from].push({ neighbourId: rel.to, rel, forward: true });
-    adj[rel.to].push({ neighbourId: rel.from, rel, forward: false });
-  }
-
-  // BFS
-  const visited = new Set<string>([fromId]);
-  const queue: { entityId: string; path: BFSNode[] }[] = [
-    { entityId: fromId, path: [{ entityId: fromId }] }
-  ];
-
-  while (queue.length > 0) {
-    const { entityId, path } = queue.shift()!;
-    for (const { neighbourId, rel, forward } of (adj[entityId] ?? [])) {
-      if (visited.has(neighbourId)) continue;
-      visited.add(neighbourId);
-      const newPath = [...path, { entityId: neighbourId, via: { rel, forward } }];
-      if (neighbourId === toId) {
-        return newPath;
-      }
-      queue.push({ entityId: neighbourId, path: newPath });
-    }
-  }
-  return null; // No path
 }
 
 export function PathFinderPanel() {
@@ -65,7 +25,7 @@ export function PathFinderPanel() {
   const entities = currentOntology.entityTypes;
   const relationships = currentOntology.relationships;
 
-  const path = useMemo<BFSNode[] | null>(() => {
+  const path = useMemo<PathNode[] | null>(() => {
     if (!searched || !fromId || !toId) return null;
     return findShortestPath(fromId, toId, relationships);
   }, [searched, fromId, toId, relationships]);
@@ -84,7 +44,6 @@ export function PathFinderPanel() {
               id: node.via.rel.id,
               name: node.via.rel.name,
               cardinality: node.via.rel.cardinality,
-              forward: node.via.forward,
             }
           : undefined,
       };
@@ -192,7 +151,7 @@ export function PathFinderPanel() {
 
           {noPath && (
             <div className="pathfinder-message pathfinder-message--warn">
-              No connection found between these entities.
+              No directed path found between these entities.
             </div>
           )}
 
