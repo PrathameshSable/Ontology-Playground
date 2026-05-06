@@ -152,23 +152,23 @@ export function InspectorPanel() {
               const otherEntity = currentOntology.entityTypes.find(e => e.id === otherEntityId);
               
               return (
-                <div key={rel.id} className="property-item">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div key={rel.id} className="property-item rel-item">
+                  <div className="rel-item-row">
                     {isOutgoing ? (
                       <>
                         <span className="property-name">{rel.name}</span>
-                        <ArrowRight size={14} style={{ color: 'var(--ms-blue)' }} />
-                        <span>{otherEntity?.icon} {otherEntity?.name}</span>
+                        <ArrowRight size={12} className="rel-item-arrow" />
+                        <span className="rel-item-entity">{otherEntity?.icon} {otherEntity?.name}</span>
                       </>
                     ) : (
                       <>
-                        <span>{otherEntity?.icon} {otherEntity?.name}</span>
-                        <ArrowRight size={14} style={{ color: 'var(--ms-blue)' }} />
+                        <span className="rel-item-entity">{otherEntity?.icon} {otherEntity?.name}</span>
+                        <ArrowRight size={12} className="rel-item-arrow" />
                         <span className="property-name">{rel.name}</span>
                       </>
                     )}
                   </div>
-                  <span className="property-type">{rel.cardinality}</span>
+                  <div className="rel-item-cardinality">{rel.cardinality}</div>
                 </div>
               );
             })}
