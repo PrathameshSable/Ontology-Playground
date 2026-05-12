@@ -1,0 +1,24 @@
+{
+  "name": "India Retail Lending Ontology",
+  "description": "End-to-end model of retail lending operations for Indian Banks and NBFCs. Comprehensive Ontology that covers the full lifecycle — customer onboarding and KYC, credit bureau assessment, fraud screening, decisioning, sanction, disbursement, EMI servicing, NPA classification under RBI IRACP norms, collateral management, and regulatory reporting to RBI and Credit Information Companies. 21 entities and 26 typed relationships, each grounded in specific Indian regulation (RBI KYC MD, Ind AS 109, DPDP 2023, PMLA, SARFAESI, CIC Regulation Act). Designed to power Microsoft Fabric Data Agents, Copilot Studio agents, Microsoft Foundry agents that answer real lending questions — Customer 360, application audit trails, fraud reviews, collections watchlists, and portfolio analytics — by traversing the right path without ambiguous joins.",
+  "icon": "🏦",
+  "category": "Finance",
+  "tags": [
+    "retail-lending",
+    "india",
+    "rbi",
+    "banking",
+    "nbfc",
+    "credit-risk",
+    "kyc",
+    "cibil",
+    "npa",
+    "loan-lifecycle",
+    "fabric-iq",
+    "data-agent",
+    "ind-as-109",
+    "iracp",
+    "regulatory-reporting"
+  ],
+  "author": "Prathamesh Sable"
+}
