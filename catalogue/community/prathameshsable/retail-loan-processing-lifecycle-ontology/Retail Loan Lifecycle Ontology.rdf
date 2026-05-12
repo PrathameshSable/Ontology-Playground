@@ -1,0 +1,1095 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+    xml:base="http://example.org/ontology/india-retail-loan-processing-ontology/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:ont="http://example.org/ontology/india-retail-loan-processing-ontology/">
+
+    <owl:Ontology rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/">
+        <rdfs:label>India Retail Loan Processing Ontology</rdfs:label>
+        <rdfs:comment>A comprehensive ontology covering customers, applications, KYC, credit assessment, fraud screening, decisioning, sanction, disbursement, EMI servicing, NPA classification, collateral and regulatory reporting for Indian banks and NBFCs in retail lending. Designed for Microsoft Fabric Ontology and Fabric Data Agents.</rdfs:comment>
+    </owl:Ontology>
+
+    <!-- ===================== -->
+    <!-- Entity Types (Classes) -->
+    <!-- ===================== -->
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Customer">
+        <rdfs:label>Customer</rdfs:label>
+        <rdfs:comment>A natural person who borrows from the lender. Onboarded under the RBI KYC Master Direction (2016) and protected under the Digital Personal Data Protection Act 2023. The Customer is the central node of the ontology — every loan, application, payment and bureau pull ultimately ties back to a Customer. Key attributes include customer segment (Salaried, Self-Employed Professional, Self-Employed Non-Professional, Retired, Student), monthly income (used as the denominator in FOIR calculations), and place of residence.</rdfs:comment>
+        <ont:icon>👤</ont:icon>
+        <ont:color>#FFB900</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Employer">
+        <rdfs:label>Employer</rdfs:label>
+        <rdfs:comment>The organisation that employs a salaried Customer. Captured to verify income claims (salary credits, Form 16, payslips), to apply employer-category-based underwriting policies (Cat A large listed, Cat B mid, Cat C small, Government, PSU), and to measure single-employer concentration risk on the book. For Self-Employed and Retired customers, this entity may be absent.</rdfs:comment>
+        <ont:icon>🏢</ont:icon>
+        <ont:color>#008272</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/DSA">
+        <rdfs:label>DSA</rdfs:label>
+        <rdfs:comment>Direct Selling Agent - A third-party sourcing channel — individuals or firms onboarded under RBI outsourcing guidelines and the Digital Lending Master Direction (Sep 2022) — that bring loan applications to the lender. DSAs are paid commission per booked loan. Tracking DSAs lets the lender measure channel quality, monitor source-of-business risk, and audit fraud-prone funnels.</rdfs:comment>
+        <ont:icon>👤</ont:icon>
+        <ont:color>#00A9E0</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Lender">
+        <rdfs:label>Lender</rdfs:label>
+        <rdfs:comment>The lending entity that books the loan onto its balance sheet. Either a Scheduled Commercial Bank licensed under the Banking Regulation Act 1949, or an NBFC registered under Section 45-IA of the RBI Act 1934. NBFCs are further classified under RBI Scale-Based Regulation (Oct 2021) into NBFC-BL (Base), NBFC-ML (Middle), NBFC-UL (Upper) and NBFC-TL (Top). The lender_type discriminator carries this Bank-vs-NBFC distinction.</rdfs:comment>
+        <ont:icon>📋</ont:icon>
+        <ont:color>#107C10</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Branch">
+        <rdfs:label>Branch</rdfs:label>
+        <rdfs:comment>A physical branch or digital origination point of a lender. Identified by the Indian Financial System Code (IFSC) for NEFT, RTGS and IMPS routing. Origination, in-person KYC, credit decisioning and collections workflows are all tied to a branch. Even fully digital products are administratively booked at a notional &quot;digital branch.&quot;</rdfs:comment>
+        <ont:icon>🏢</ont:icon>
+        <ont:color>#FFB900</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Employee">
+        <rdfs:label>Employee</rdfs:label>
+        <rdfs:comment>Lender&apos;s staff who participate in the loan lifecycle: Relationship Manager (RM), Credit Officer, Underwriter, Branch Manager, Risk Officer or Collections Agent. The Decision entity links to a specific Employee for auditability — a key requirement under the RBI Fair Practices Code, which mandates traceable accountability for every approval and decline.</rdfs:comment>
+        <ont:icon>👤</ont:icon>
+        <ont:color>#0078D4</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Product">
+        <rdfs:label>Product</rdfs:label>
+        <rdfs:comment>A retail lending product offered by the lender, across eight families: Personal Loan, Home Loan, Auto Loan, Credit Card, Gold Loan, Education Loan, Consumer Durable Loan, Two-Wheeler Loan. The is_secured flag drives whether collateral is required (Home / Auto / Gold / Two-Wheeler are secured; Personal / Credit Card / Education / Consumer Durable are unsecured). Each product also has minimum and maximum amount and tenure boundaries.</rdfs:comment>
+        <ont:icon>🛒</ont:icon>
+        <ont:color>#00A9E0</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Collateral">
+        <rdfs:label>Collateral</rdfs:label>
+        <rdfs:comment>An asset pledged as security against a loan. Indian retail collateral comes in three principal types: Property (residential or commercial, enforceable under the SARFAESI Act 2002), Vehicle (hypothecated and marked on the Registration Certificate per the Motor Vehicles Act 1988), and Gold (with assayed weight in grams and purity in carats). Fixed Deposits and Securities also occasionally serve as collateral. Valuation is captured to compute Loan-to-Value (LTV).</rdfs:comment>
+        <ont:icon>🔗</ont:icon>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Document">
+        <rdfs:label>Document</rdfs:label>
+        <rdfs:comment>Supporting evidence collected during loan origination. Required documents vary by product family: PAN Card and Aadhaar e-KYC are universal; salaried customers need Payslip and Form 16; self-employed customers need ITR and GST returns; Home Loan applicants provide Property Papers and Sale Agreement; Auto Loan applicants provide Vehicle Quotation and (post-disbursal) the RC Book; Gold Loan applicants provide a Gold Appraisal Report from a certified valuer. NACH mandate is also captured here for repayment setup</rdfs:comment>
+        <ont:icon>📋</ont:icon>
+        <ont:color>#008272</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Application">
+        <rdfs:label>Application</rdfs:label>
+        <rdfs:comment>A customer&apos;s formal request for a specific retail loan product. The origination hub of the ontology — every customer interaction before disbursement (KYC, bureau pull, credit assessment, fraud screening, document collection, decision, sanction) ties back to an Application. Captures the channel (Branch / DSA / Digital / Aggregator / Tele-Sales / Open Market) per RBI Digital Lending MD, the requested amount and tenure, and the application status as it progresses (New → KYC-Pending → Underwriting → Approved / Declined → Disbursed).</rdfs:comment>
+        <ont:icon>🎯</ont:icon>
+        <ont:color>#FFB900</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/KYC_Record">
+        <rdfs:label>KYC_Record</rdfs:label>
+        <rdfs:comment>Know-Your-Customer verification under the RBI KYC Master Direction. Captures the verification mode — Aadhaar OTP (online), Aadhaar Biometric (with fingerprint), Video-KYC (V-CIP under RBI&apos;s Video Customer Identification Process guidelines), In-Person, or Offline Aadhaar XML — and the outcome (Pass / Fail / Pending). The pep_flag identifies Politically Exposed Persons under the Prevention of Money Laundering Act 2002, which triggers Enhanced Due Diligence (EDD).</rdfs:comment>
+        <ont:icon>💳</ont:icon>
+        <ont:color>#D83B01</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Bureau_Report">
+        <rdfs:label>Credit_Bureau_Report</rdfs:label>
+        <rdfs:comment>A Credit Information Report (CIR) pulled from one of the four Credit Information Companies (CICs) regulated under the CIC Regulation Act 2005: CIBIL TransUnion, Experian, Equifax, and CRIF Highmark. Captures the CIBIL score (range 300–900, with -1 indicating no-hit / New-to-Credit (NTC) — a critical edge case in Indian retail lending), active tradelines (existing loans across the industry), and total outstanding exposure. The bureau report is the foundation of the credit assessment.</rdfs:comment>
+        <ont:icon>📋</ont:icon>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Assessment">
+        <rdfs:label>Credit_Assessment</rdfs:label>
+        <rdfs:comment>The lender&apos;s internal risk evaluation of an application. The most analytically rich entity in the ontology. Captures FOIR (Fixed Obligation to Income Ratio) — India&apos;s primary affordability metric, typically capped at 0.50–0.65 by lender policy; DTI (Debt-to-Income), LTV (Loan-to-Value) for secured loans, the internal credit grade (A/B/C/D), and the three Ind AS 109 / Basel risk parameters: Probability of Default (PD), Loss Given Default (LGD) and Exposure at Default (EAD). Ends with the affordability outcome (Pass / Marginal / Fail).</rdfs:comment>
+        <ont:icon>📋</ont:icon>
+        <ont:color>#FFB900</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Fraud_Check">
+        <rdfs:label>Fraud_Check</rdfs:label>
+        <rdfs:comment>Internal and external fraud screening of the application. Includes checks against negative lists (Hunter consortium, internal Do-Not-Lend lists), device fingerprinting, social-graph analysis, and AML risk scoring. Outcome is one of Clear / Review / Reject, plus a fraud_risk_score on a 0–1 scale. RBI Fraud Risk Management norms require every retail application to be screened before disbursement.</rdfs:comment>
+        <ont:icon>⚡</ont:icon>
+        <ont:color>#D83B01</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Decision">
+        <rdfs:label>Decision</rdfs:label>
+        <rdfs:comment>The formal Approve / Decline / Refer / Conditional Approval outcome on a credit assessment. The accountability checkpoint of the lifecycle — the RBI Fair Practices Code mandates that decline reasons be documented and communicated to the customer, and the deciding employee be traceable. Conditional Approvals carry pre-disbursement conditions (e.g. additional documentation, lower amount, higher rate).</rdfs:comment>
+        <ont:icon>⚡</ont:icon>
+        <ont:color>#008272</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Sanction_Letter">
+        <rdfs:label>Sanction_Letter</rdfs:label>
+        <rdfs:comment>The formal in-principle approval letter issued to the customer after an Approved decision. Captures the sanctioned amount (typically slightly lower than the requested amount), Rate of Interest, tenure, processing fee, and conditions precedent. Format and disclosures are prescribed under the RBI Fair Practices Code and the Key Fact Statement (KFS) norms — a standardised one-page disclosure that gives the customer the true cost of credit before they sign.</rdfs:comment>
+        <ont:icon>📋</ont:icon>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Loan">
+        <rdfs:label>Loan</rdfs:label>
+        <rdfs:comment>A booked retail loan account — the contractual obligation post-disbursement. The servicing hub of the ontology — every post-disbursement event (payment, missed EMI, NPA classification, regulatory report) attaches here. Captures principal, ROI with rate_type per RBI conventions (Fixed / Floating-RLLR / Floating-MCLR / Floating-EBLR for External Benchmark-Linked Rate), tenure, EMI, outstanding balance, and the Ind AS 109 Expected Credit Loss stage: Stage 1 (performing), Stage 2 (significant credit deterioration), Stage 3 (credit-impaired).</rdfs:comment>
+        <ont:icon>🎯</ont:icon>
+        <ont:color>#FFB900</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Repayment_Schedule">
+        <rdfs:label>Repayment_Schedule</rdfs:label>
+        <rdfs:comment>The EMI amortisation plan attached to a Loan. One row per scheduled instalment over the entire loan tenure. Captures due date, total EMI amount, the principal-and-interest split, opening and closing balances, and status (Scheduled / Paid / Overdue / Partial). For a 240-month Home Loan, this produces 240 rows. Drives reminder generation, NACH mandate triggering, and DPD computation.</rdfs:comment>
+        <ont:icon>💳</ont:icon>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Payment">
+        <rdfs:label>Payment</rdfs:label>
+        <rdfs:comment>An actual EMI inflow against a Loan. Captures the amount, mode (NACH auto-debit being the dominant Indian retail mode, plus UPI AutoPay, IMPS, NEFT, RTGS, cheque, and cash), and status (Successful / Bounced / Reversed / Pending). Each Payment links back to the specific scheduled instalment it settles. Bounced payments trigger collections workflows; multiple bounces lead to SMA classification.</rdfs:comment>
+        <ont:icon>🔗</ont:icon>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/NPA_Classification">
+        <rdfs:label>NPA_Classification</rdfs:label>
+        <rdfs:comment>Asset classification of a loan under the RBI Master Direction on Income Recognition, Asset Classification and Provisioning (IRACP) — the foundation of Indian credit risk reporting. Captures the asset class on a specific date: Standard (regular), SMA-0 (Special Mention Account, 1–30 DPD), SMA-1 (31–60 DPD), SMA-2 (61–90 DPD), Sub-Standard (91–365 DPD — formally NPA), Doubtful (&gt;365 DPD), or Loss. Drives provisioning under Ind AS 109 ECL. A loan can have multiple NPA classifications over time as it slips or recovers.</rdfs:comment>
+        <ont:icon>📋</ont:icon>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <owl:Class rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/Regulatory_Report">
+        <rdfs:label>Regulatory_Report</rdfs:label>
+        <rdfs:comment>Aggregated submissions made by the lender to regulators. Includes CRILC (Central Repository of Information on Large Credits — RBI&apos;s exposure database), DSB-I / DSB-II / DSB-III returns (Department of Supervision of Banks reporting suite), NPA Returns, Priority Sector Lending compliance returns, monthly CIC submissions per the CIC Regulation Act 2005, and NABARD reporting for agricultural / rural exposure. A single Loan can appear in many regulatory reports across its life.</rdfs:comment>
+        <ont:icon>📋</ont:icon>
+        <ont:color>#5C2D91</ont:color>
+    </owl:Class>
+
+    <!-- ================ -->
+    <!-- Data Properties -->
+    <!-- ================ -->
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/customer_customer_id">
+        <rdfs:label>customer_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Lender&apos;s internal unique customer identifier. [Entity key for Customer]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/customer_full_name">
+        <rdfs:label>full_name</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Customer&apos;s full legal name (PII under DPDP 2023).</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/customer_customer_segment">
+        <rdfs:label>customer_segment</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Income segment: Salaried, Self-Employed Professional, Self-Employed Non-Professional, Retired, Student.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/customer_monthly_income_inr">
+        <rdfs:label>monthly_income_inr</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Net monthly income in Indian Rupees - the denominator in FOIR calculation.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/customer_city">
+        <rdfs:label>city</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Customer&apos;s city.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/customer_state">
+        <rdfs:label>state</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Customer&apos;s state.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/employer_employer_id">
+        <rdfs:label>employer_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Employer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Employer identifier. [Entity key for Employer]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/employer_employer_name">
+        <rdfs:label>employer_name</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Employer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Employer name.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/employer_employer_category">
+        <rdfs:label>employer_category</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Employer"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Internal employer tier: Cat A (large listed), Cat B (mid), Cat C (small), Government, PSU.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/dSA_dsa_id">
+        <rdfs:label>dsa_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/DSA"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>DSA identifier. [Entity key for DSA]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/dSA_dsa_name">
+        <rdfs:label>dsa_name</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/DSA"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>DSA name.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/lender_lender_id">
+        <rdfs:label>lender_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Lender"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Lender identifier. [Entity key for Lender]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/lender_lender_name">
+        <rdfs:label>lender_name</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Lender"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Lender name.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/lender_lender_type">
+        <rdfs:label>lender_type</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Lender"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>BANK (Scheduled Commercial Bank under BR Act 1949) or NBFC (under RBI Scale-Based Regulation 2021).</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/lender_nbfc_category">
+        <rdfs:label>nbfc_category</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Lender"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>RBI Scale-Based Regulation tier (Oct 2021): NBFC-BL (Base), NBFC-ML (Middle), NBFC-UL (Upper), NBFC-TL (Top). Only populated for NBFCs.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/branch_branch_id">
+        <rdfs:label>branch_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Branch"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Branch identifier. [Entity key for Branch]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/branch_ifsc_code">
+        <rdfs:label>ifsc_code</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Branch"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Indian Financial System Code identifying the branch for NEFT/RTGS/IMPS routing.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/branch_branch_city">
+        <rdfs:label>branch_city</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Branch"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Branch city.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/branch_region">
+        <rdfs:label>region</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Branch"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>North / South / East / West / Central / North-East.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/employee_employee_id">
+        <rdfs:label>employee_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Employee"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Employee identifier. [Entity key for Employee]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/employee_employee_role">
+        <rdfs:label>employee_role</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Employee"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Employee role: RM, credit officer, underwriter, branch manager, collections agent.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/product_product_id">
+        <rdfs:label>product_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Product identifier. [Entity key for Product]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/product_product_family">
+        <rdfs:label>product_family</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Personal Loan, Home Loan, Auto Loan, Credit Card, Gold Loan, Education Loan, Consumer Durable Loan, Two-Wheeler Loan.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/product_is_secured">
+        <rdfs:label>is_secured</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Product"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Whether the product requires collateral. Drives the secured_by relationship.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/collateral_collateral_id">
+        <rdfs:label>collateral_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Collateral"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Collateral identifier. [Entity key for Collateral]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/collateral_collateral_type">
+        <rdfs:label>collateral_type</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Collateral"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Property, Vehicle, Gold, FixedDeposit or Securities.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/collateral_valuation_inr">
+        <rdfs:label>valuation_inr</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Collateral"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Valuation in Indian Rupees.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/document_document_id">
+        <rdfs:label>document_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Document"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Document identifier. [Entity key for Document]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/document_document_type">
+        <rdfs:label>document_type</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Document"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>PAN Card, Aadhaar e-KYC, Payslip, Form 16, ITR, Bank Statement, Property Papers, NACH Mandate, Gold Appraisal Report, etc.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/application_application_id">
+        <rdfs:label>application_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Application identifier. [Entity key for Application]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/application_application_date">
+        <rdfs:label>application_date</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+        <rdfs:comment>Application submission date.</rdfs:comment>
+        <ont:propertyType>date</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/application_requested_amount_inr">
+        <rdfs:label>requested_amount_inr</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Requested amount in Indian Rupees.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/application_channel">
+        <rdfs:label>channel</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Origination channel: Branch / DSA / Digital / Aggregator / Tele-Sales / Open Market.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/application_application_status">
+        <rdfs:label>application_status</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>New / KYC-Pending / Underwriting / Approved / Declined / Disbursed / Withdrawn.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/kYC_Record_kyc_id">
+        <rdfs:label>kyc_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/KYC_Record"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>KYC record identifier. [Entity key for KYC_Record]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/kYC_Record_kyc_mode">
+        <rdfs:label>kyc_mode</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/KYC_Record"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Aadhaar OTP, Aadhaar Biometric, Video-KYC (V-CIP), In-Person, Offline Aadhaar XML.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/kYC_Record_kyc_outcome">
+        <rdfs:label>kyc_outcome</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/KYC_Record"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Pass / Fail / Pending.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/kYC_Record_pep_flag">
+        <rdfs:label>pep_flag</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/KYC_Record"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+        <rdfs:comment>Politically Exposed Person flag under PMLA 2002 - triggers Enhanced Due Diligence.</rdfs:comment>
+        <ont:propertyType>boolean</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/credit_Bureau_Report_bureau_report_id">
+        <rdfs:label>bureau_report_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Bureau_Report"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Bureau report identifier. [Entity key for Credit_Bureau_Report]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/credit_Bureau_Report_bureau_name">
+        <rdfs:label>bureau_name</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Bureau_Report"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>CIBIL TransUnion, Experian, Equifax or CRIF Highmark.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/credit_Bureau_Report_cibil_score">
+        <rdfs:label>cibil_score</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Bureau_Report"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Bureau score 300-900. A value of -1 indicates no-hit / New-to-Credit (NTC).</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/credit_Assessment_assessment_id">
+        <rdfs:label>assessment_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Assessment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Credit assessment identifier. [Entity key for Credit_Assessment]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/credit_Assessment_foir_ratio">
+        <rdfs:label>foir_ratio</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Assessment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Fixed Obligation to Income Ratio - India&apos;s primary affordability metric.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/credit_Assessment_internal_grade">
+        <rdfs:label>internal_grade</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Assessment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Internal credit grade A/B/C/D.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/credit_Assessment_probability_of_default">
+        <rdfs:label>probability_of_default</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Assessment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>12-month PD estimate per Ind AS 109 modelling.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/credit_Assessment_affordability_outcome">
+        <rdfs:label>affordability_outcome</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Assessment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Pass / Marginal / Fail.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/fraud_Check_fraud_check_id">
+        <rdfs:label>fraud_check_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Fraud_Check"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Fraud check identifier. [Entity key for Fraud_Check]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/fraud_Check_fraud_outcome">
+        <rdfs:label>fraud_outcome</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Fraud_Check"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Clear / Review / Reject.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/fraud_Check_fraud_risk_score">
+        <rdfs:label>fraud_risk_score</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Fraud_Check"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Risk score 0-1.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/decision_decision_id">
+        <rdfs:label>decision_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Decision"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Decision identifier. [Entity key for Decision]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/decision_decision_outcome">
+        <rdfs:label>decision_outcome</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Decision"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Approved / Declined / Referred / Conditional Approval.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/decision_decline_reason">
+        <rdfs:label>decline_reason</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Decision"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Reason for decline - mandatory per RBI Fair Practices Code.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/sanction_Letter_sanction_letter_id">
+        <rdfs:label>sanction_letter_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Sanction_Letter"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Sanction letter identifier. [Entity key for Sanction_Letter]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/sanction_Letter_sanctioned_amount_inr">
+        <rdfs:label>sanctioned_amount_inr</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Sanction_Letter"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Sanctioned amount in Indian Rupees.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/sanction_Letter_sanction_roi">
+        <rdfs:label>sanction_roi</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Sanction_Letter"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Annual Rate of Interest - disclosed per RBI Key Fact Statement norms.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/loan_loan_account_number">
+        <rdfs:label>loan_account_number</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Loan account number. [Entity key for Loan]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/loan_principal_inr">
+        <rdfs:label>principal_inr</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Principal amount in Indian Rupees.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/loan_interest_rate">
+        <rdfs:label>interest_rate</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Annual interest rate.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/loan_rate_type">
+        <rdfs:label>rate_type</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Fixed / Floating-RLLR / Floating-MCLR / Floating-EBLR.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/loan_emi_amount_inr">
+        <rdfs:label>emi_amount_inr</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>EMI amount in Indian Rupees.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/loan_tenure_months">
+        <rdfs:label>tenure_months</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Loan tenure in months.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/loan_outstanding_balance_inr">
+        <rdfs:label>outstanding_balance_inr</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Outstanding balance in Indian Rupees.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/loan_loan_status">
+        <rdfs:label>loan_status</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Active / Closed / Foreclosed / Written-Off / Restructured.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/loan_ind_as_109_stage">
+        <rdfs:label>ind_as_109_stage</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>ECL stage: 1 (performing), 2 (significant credit deterioration), 3 (credit-impaired).</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/repayment_Schedule_schedule_id">
+        <rdfs:label>schedule_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Repayment_Schedule"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Schedule entry identifier. [Entity key for Repayment_Schedule]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/repayment_Schedule_instalment_no">
+        <rdfs:label>instalment_no</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Repayment_Schedule"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Instalment sequence number.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/repayment_Schedule_due_date">
+        <rdfs:label>due_date</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Repayment_Schedule"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+        <rdfs:comment>Due date of the instalment.</rdfs:comment>
+        <ont:propertyType>date</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/repayment_Schedule_schedule_status">
+        <rdfs:label>schedule_status</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Repayment_Schedule"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Scheduled / Paid / Overdue / Partial.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/payment_payment_id">
+        <rdfs:label>payment_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Payment identifier. [Entity key for Payment]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/payment_payment_date">
+        <rdfs:label>payment_date</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+        <rdfs:comment>Payment date.</rdfs:comment>
+        <ont:propertyType>date</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/payment_payment_amount_inr">
+        <rdfs:label>payment_amount_inr</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Payment amount in Indian Rupees.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/payment_payment_mode">
+        <rdfs:label>payment_mode</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>NACH / UPI AutoPay / Cheque / Cash / IMPS / NEFT / RTGS.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/payment_payment_status">
+        <rdfs:label>payment_status</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Payment"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Successful / Bounced / Reversed / Pending.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/nPA_Classification_npa_classification_id">
+        <rdfs:label>npa_classification_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/NPA_Classification"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>NPA classification identifier. [Entity key for NPA_Classification]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/nPA_Classification_days_past_due">
+        <rdfs:label>days_past_due</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/NPA_Classification"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+        <rdfs:comment>Days past due.</rdfs:comment>
+        <ont:propertyType>integer</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/nPA_Classification_asset_class">
+        <rdfs:label>asset_class</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/NPA_Classification"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>RBI IRACP classification: Standard, SMA-0, SMA-1, SMA-2, Sub-Standard, Doubtful, Loss.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/nPA_Classification_provision_inr">
+        <rdfs:label>provision_inr</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/NPA_Classification"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+        <rdfs:comment>Provisioning amount under Ind AS 109 ECL.</rdfs:comment>
+        <ont:propertyType>decimal</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/regulatory_Report_reg_report_id">
+        <rdfs:label>reg_report_id</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Regulatory_Report"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>Regulatory report identifier. [Entity key for Regulatory_Report]</rdfs:comment>
+        <ont:isIdentifier rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</ont:isIdentifier>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/regulatory_Report_reg_report_type">
+        <rdfs:label>reg_report_type</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Regulatory_Report"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>CRILC / DSB-I / DSB-II / DSB-III / NPA Return / Priority Sector Return / CIC Monthly.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <owl:DatatypeProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/regulatory_Report_submitted_to_regulator">
+        <rdfs:label>submitted_to_regulator</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Regulatory_Report"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:comment>RBI / SEBI / NABARD / CIBIL / Experian / Equifax / CRIF Highmark.</rdfs:comment>
+        <ont:propertyType>string</ont:propertyType>
+    </owl:DatatypeProperty>
+
+    <!-- ================== -->
+    <!-- Object Properties -->
+    <!-- ================== -->
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/employed_by">
+        <rdfs:label>employed_by</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Employer"/>
+        <rdfs:comment>Salaried customer to employer - used for income verification under RBI Fair Practices Code and for employer concentration risk analysis.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>customer</ont:fromEntityId>
+        <ont:toEntityId>employer</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/belongs_to_lender">
+        <rdfs:label>belongs_to_lender</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Branch"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Lender"/>
+        <rdfs:comment>Branch belongs to a Bank or NBFC.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>branch</ont:fromEntityId>
+        <ont:toEntityId>lender</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/employs">
+        <rdfs:label>employs</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Branch"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Employee"/>
+        <rdfs:comment>Branch employs staff (relationship managers, credit officers, underwriters, collections agents).</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>branch</ont:fromEntityId>
+        <ont:toEntityId>employee</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/submitted_by">
+        <rdfs:label>submitted_by</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:comment>Application is submitted by the primary customer (the borrower).</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>application</ont:fromEntityId>
+        <ont:toEntityId>customer</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/has_co_applicant">
+        <rdfs:label>has_co_applicant</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:comment>Application optionally has a co-applicant (jointly liable, typically spouse on Home Loan or parent on Education Loan).</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>application</ont:fromEntityId>
+        <ont:toEntityId>customer</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/has_guarantor">
+        <rdfs:label>has_guarantor</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:comment>Application optionally has a guarantor providing a personal guarantee under Section 126 of the Indian Contract Act.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>application</ont:fromEntityId>
+        <ont:toEntityId>customer</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/originated_at">
+        <rdfs:label>originated_at</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Branch"/>
+        <rdfs:comment>Application originated at a specific branch or digital origination point.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>application</ont:fromEntityId>
+        <ont:toEntityId>branch</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/for_product">
+        <rdfs:label>for_product</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Product"/>
+        <rdfs:comment>Application is for a specific retail loan product.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>application</ont:fromEntityId>
+        <ont:toEntityId>product</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/sourced_via">
+        <rdfs:label>sourced_via</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/DSA"/>
+        <rdfs:comment>Application was optionally sourced via a Direct Selling Agent under RBI outsourcing norms.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>application</ont:fromEntityId>
+        <ont:toEntityId>dSA</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/has_kyc">
+        <rdfs:label>has_kyc</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/KYC_Record"/>
+        <rdfs:comment>Application has a KYC verification record per the RBI KYC Master Direction.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>application</ont:fromEntityId>
+        <ont:toEntityId>kYC_Record</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/has_assessment">
+        <rdfs:label>has_assessment</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Assessment"/>
+        <rdfs:comment>Application is underwritten via a credit assessment capturing FOIR, internal grade and Ind AS 109 risk parameters.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>application</ont:fromEntityId>
+        <ont:toEntityId>credit_Assessment</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/fraud_checked">
+        <rdfs:label>fraud_checked</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Fraud_Check"/>
+        <rdfs:comment>Application is screened through internal and external fraud checks.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>application</ont:fromEntityId>
+        <ont:toEntityId>fraud_Check</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/evidenced_by">
+        <rdfs:label>evidenced_by</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Application"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Document"/>
+        <rdfs:comment>Application is supported by multiple documents (PAN, Aadhaar, payslip, bank statement, etc.). One application maps to many documents.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>application</ont:fromEntityId>
+        <ont:toEntityId>document</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/uses_bureau_report">
+        <rdfs:label>uses_bureau_report</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Assessment"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Bureau_Report"/>
+        <rdfs:comment>Credit assessment uses a credit bureau report from one of the four CICs (CIBIL TransUnion, Experian, Equifax, CRIF Highmark).</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>credit_Assessment</ont:fromEntityId>
+        <ont:toEntityId>credit_Bureau_Report</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/has_decision">
+        <rdfs:label>has_decision</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Credit_Assessment"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Decision"/>
+        <rdfs:comment>Credit assessment produces a decision: Approved, Declined, Referred or Conditional Approval.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>credit_Assessment</ont:fromEntityId>
+        <ont:toEntityId>decision</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/decided_by">
+        <rdfs:label>decided_by</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Decision"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Employee"/>
+        <rdfs:comment>Decision was made by a specific employee (credit officer, underwriter or branch manager). Accountability trail per RBI Fair Practices Code.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>decision</ont:fromEntityId>
+        <ont:toEntityId>employee</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/triggers_sanction">
+        <rdfs:label>triggers_sanction</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Decision"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Sanction_Letter"/>
+        <rdfs:comment>An approved decision triggers the issuance of a Sanction Letter to the customer per RBI Key Fact Statement norms.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>decision</ont:fromEntityId>
+        <ont:toEntityId>sanction_Letter</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/books_loan">
+        <rdfs:label>books_loan</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Sanction_Letter"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:comment>Sanction letter, when accepted and disbursed, books a Loan account.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>sanction_Letter</ont:fromEntityId>
+        <ont:toEntityId>loan</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/held_by">
+        <rdfs:label>held_by</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Customer"/>
+        <rdfs:comment>Loan is held by the primary borrower (customer).</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>loan</ont:fromEntityId>
+        <ont:toEntityId>customer</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/booked_by_lender">
+        <rdfs:label>booked_by_lender</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Lender"/>
+        <rdfs:comment>Loan is booked on the books of a specific lender (Bank or NBFC).</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>loan</ont:fromEntityId>
+        <ont:toEntityId>lender</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/secured_by">
+        <rdfs:label>secured_by</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Collateral"/>
+        <rdfs:comment>Loan is optionally secured by collateral (Property, Vehicle, or Gold). Null for unsecured products.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>loan</ont:fromEntityId>
+        <ont:toEntityId>collateral</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/has_schedule">
+        <rdfs:label>has_schedule</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Repayment_Schedule"/>
+        <rdfs:comment>Loan has a repayment schedule - one row per scheduled EMI instalment over the loan tenure.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>loan</ont:fromEntityId>
+        <ont:toEntityId>repayment_Schedule</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/has_payment">
+        <rdfs:label>has_payment</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Payment"/>
+        <rdfs:comment>Loan has received zero or more EMI payments via NACH, UPI AutoPay, NEFT, IMPS, RTGS, cheque or cash.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>loan</ont:fromEntityId>
+        <ont:toEntityId>payment</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/pays_instalment">
+        <rdfs:label>pays_instalment</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Payment"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Repayment_Schedule"/>
+        <rdfs:comment>A Payment settles a specific scheduled instalment - the link between the schedule plan and the actual inflow.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>payment</ont:fromEntityId>
+        <ont:toEntityId>repayment_Schedule</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/has_npa_status">
+        <rdfs:label>has_npa_status</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/NPA_Classification"/>
+        <rdfs:comment>Loan has NPA classification(s) over time under RBI IRACP norms. Drives provisioning under Ind AS 109.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>loan</ont:fromEntityId>
+        <ont:toEntityId>nPA_Classification</ont:toEntityId>
+    </owl:ObjectProperty>
+
+    <owl:ObjectProperty rdf:about="http://example.org/ontology/india-retail-loan-processing-ontology/aggregated_into">
+        <rdfs:label>aggregated_into</rdfs:label>
+        <rdfs:domain rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Loan"/>
+        <rdfs:range rdf:resource="http://example.org/ontology/india-retail-loan-processing-ontology/Regulatory_Report"/>
+        <rdfs:comment>Loan is reported into regulatory submissions: CRILC (large exposures), DSB returns, NPA returns, Priority Sector Lending and monthly CIC submissions.</rdfs:comment>
+        <ont:cardinality>one-to-many</ont:cardinality>
+        <ont:fromEntityId>loan</ont:fromEntityId>
+        <ont:toEntityId>regulatory_Report</ont:toEntityId>
+    </owl:ObjectProperty>
+
+</rdf:RDF>
